@@ -1,2 +1,5 @@
 pip-tools
+
+requests
 beautifulsoup4
+pandas
