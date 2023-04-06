@@ -1,4 +1,5 @@
 pip-tools
+black
 
 requests
 beautifulsoup4
