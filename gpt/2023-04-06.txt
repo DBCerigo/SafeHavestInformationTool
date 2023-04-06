@@ -1,0 +1,159 @@
+Scrape this website:https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/ with Python and any common packages you need (e.g. Beautiful Soup). 
+
+Select the "Pacific Oyster (Crassostrea gigas)" in the id="SpeciesSelect" component. Then for each "leaflet-marker-icon", access the "leaflet-popup-content", and scrape out the "href" value. An example of one of these values is https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/details/?species=OYG&connection=SHS&PointID=B014W The output should be a list of these URLs for all "PointID"s where "species=OYG".
+
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/'
+
+page = requests.get(url)
+soup = BeautifulSoup(page.content, 'html.parser')
+
+url_list = []
+
+for marker in soup.find_all('div', class_='leaflet-marker-icon'):
+    for link in marker.find_all('a'):
+        if 'species=OYG' in link['href']:
+            url_list.append(link['href'])
+
+print(url_list)
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/'
+
+page = requests.get(url)
+soup = BeautifulSoup(page.content, 'html.parser')
+
+url_list = []
+
+for marker in soup.find_all('div', class_='leaflet-marker-icon'):
+    for link in marker.find_all('a'):
+        if 'species=OYG' in link['href']:
+            url_list.append(link['href'])
+
+print(url_list)
+
+
+####
+
+
+Here's a sample from a csv file: 
+Designated Use	Production Area	Classification Zone	Species(a)	Classification	Explanatory Note(b)	Local Authority	RMP ID	RMP Name	England or Wales
+Production	Anglesey - East	Anglesey Mussels	Mytilus spp.	A	1	Gwynedd CC	B104A	Anglesey Mussels	Wales
+Production	Anglesey – Red Wharf Bay	Red Wharf Bay	C. edule	B-LT	N/A	Ynys Mon CC	B057J	Nodwydd	Wales
+Production	Bigbury and Avon	West Bank	C. gigas	B 	N/A	South Hams DC	B030I	West Bank North	England
+Production	Bigbury and Avon	South Hexdown	C. gigas	B 	N/A	South Hams DC	B030J	South Hexdown North	England
+
+Write code to read the csv file, filter on `Species(a)` column for value `C. gigas`, then save that filtered csv to disk, and then also output the values from column RMP ID (check they are unique - they should be). 
+
+Here's a Python code snippet that reads the CSV file, filters on the Species(a) column for the value C. gigas, saves the filtered CSV to disk, and outputs the unique values from the RMP ID column:
+
+python
+
+import csv
+import pandas as pd
+
+# Read the CSV file
+data = pd.read_csv('input.csv')
+
+# Filter on the 'Species(a)' column for the value 'C. gigas'
+filtered_data = data[data['Species(a)'] == 'C. gigas']
+
+# Save the filtered CSV to disk
+filtered_data.to_csv('filtered_data.csv', index=False)
+
+# Get unique values from the 'RMP ID' column
+unique_rmp_ids = filtered_data['RMP ID'].unique()
+
+# Print the unique RMP ID values
+print(unique_rmp_ids)
+
+Replace 'input.csv' with the path to your original CSV file. After running this code, you will find the filtered CSV saved as filtered_data.csv in the same directory where you run the script, and the unique RMP ID values will be printed on the screen.
+dan@datavaluepeople.com
+You didn't check if the `RMP ID` column was actually unique, i.e. check for no duplicates
+
+Apologies for the confusion. Here's the modified code that checks if the RMP ID column contains unique values in the filtered data:
+
+python
+
+import csv
+import pandas as pd
+
+# Read the CSV file
+data = pd.read_csv('input.csv')
+
+# Filter on the 'Species(a)' column for the value 'C. gigas'
+filtered_data = data[data['Species(a)'] == 'C. gigas']
+
+# Save the filtered CSV to disk
+filtered_data.to_csv('filtered_data.csv', index=False)
+
+# Get unique values from the 'RMP ID' column
+unique_rmp_ids = filtered_data['RMP ID'].unique()
+
+# Check if the 'RMP ID' column contains unique values
+if len(unique_rmp_ids) == len(filtered_data):
+    print("The 'RMP ID' column contains unique values.")
+else:
+    print("The 'RMP ID' column contains duplicate values.")
+
+# Print the unique RMP ID values
+print(unique_rmp_ids)
+
+This code checks if the
+
+
+####
+
+
+Hey baby! here's a list of IDs ['B030I' 'B030J' 'B030K' 'B014A' 'B014U']
+
+I was to use python, to download a file for each of those IDs from a URL. Inject ID into the URL. Here's an example URL: https://www.cefas.co.uk/umbraco/CefasPlugins/ShsSurface/CSV?connection=SHS&pointId=B030I&species=OYG
+The script should download a file per ID, and name it by the ID. Ty xx
+
+Sure! Here's a Python script that downloads a file for each ID in the provided list, injects the ID into the URL, and names the file using the ID:
+
+python
+
+import requests
+
+ids = ['B030I', 'B030J', 'B030K', 'B014A', 'B014U']
+base_url = "https://www.cefas.co.uk/umbraco/CefasPlugins/ShsSurface/CSV?connection=SHS&pointId={}&species=OYG"
+
+for id_ in ids:
+    # Inject the ID into the URL
+    url = base_url.format(id_)
+
+    # Download the file
+    response = requests.get(url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Save the file with the ID as its name
+        with open(f"{id_}.csv", "wb") as f:
+            f.write(response.content)
+        print(f"Downloaded file for ID {id_}.")
+    else:
+        print(f"Failed to download file for ID {id_}.")
+
+
+
+
+#### GPT-3.5
+
+Hey, take this list, and add comma between each value so I can copy and past it directly into python code: 
+['B030I' 'B030J' 'B030K' 'B014A' 'B014U' 'B014V' 'B014W' 'B014X' 'B014Y'
+ 'B14AD' 'B05AT' 'B009E' 'B035I' 'B035Q' 'B35AC' 'B35AD' 'B12AC' 'B12AD'
+ 'B12AG' 'B12AK' 'B12AR' 'B015T' 'B015Y' 'B015Z' 'B15AA' 'B028B' 'B028J'
+ 'B028P' 'B26BC' 'B26BH' 'B26BK' 'B033L' 'B033N' 'B33BE' 'B33BG' 'B33BM'
+ 'B033E' 'B033F' 'B033H' 'B033V' 'B33BF' 'B33BI' 'B034W' 'B34AE' 'B34AH'
+ 'B001M' 'B019L' 'B042L' 'B39CZ' 'B48AX' 'B17BS' 'B17CP' 'B033R' 'B54BL'
+ 'B54CK' 'B020R' 'B020W' 'B73AC' 'B73AI' 'B73AJ' 'B73AK' 'B73AL' 'B021Y'
+ 'B076N' 'B076P' 'B076Q' 'B36AD' 'B27AH' 'B16BS' 'B16CK' 'B25AI' 'B013V'
+ 'B013Y' 'B013Z' 'B13AA' 'B13AC' 'B13AG' 'B13AH']
+
+Sure! Here's the list with commas added between each value:
+
+['B030I', 'B030J', 'B030K', 'B014A', 'B014U', 'B014V', 'B014W', 'B014X', 'B014Y', 'B14AD', 'B05AT', 'B009E', 'B035I', 'B035Q', 'B35AC', 'B35AD', 'B12AC', 'B12AD', 'B12AG', 'B12AK', 'B12AR', 'B015T', 'B015Y', 'B015Z', 'B15AA', 'B028B', 'B028J', 'B028P', 'B26BC', 'B26BH', 'B26BK', 'B033L', 'B033N', 'B33BE', 'B33BG', 'B33BM', 'B033E', 'B033F', 'B033H', 'B033V', 'B33BF', 'B33BI', 'B034W', 'B34AE', 'B34AH', 'B001M', 'B019L', 'B042L', 'B39CZ', 'B48AX', 'B17BS', 'B17CP', 'B033R', 'B54BL', 'B54CK', 'B020R', 'B020W', 'B73AC', 'B73AI', 'B73AJ', 'B73AK', 'B73AL', 'B021Y', 'B076N', 'B076P', 'B076Q', 'B36AD', 'B27AH', 'B16BS', 'B16CK', 'B25AI', 'B013V', 'B013Y', 'B013Z', 'B13AA', 'B13AC', 'B13AG', 'B13AH']
