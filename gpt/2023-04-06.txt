@@ -157,3 +157,65 @@ Hey, take this list, and add comma between each value so I can copy and past it 
 Sure! Here's the list with commas added between each value:
 
 ['B030I', 'B030J', 'B030K', 'B014A', 'B014U', 'B014V', 'B014W', 'B014X', 'B014Y', 'B14AD', 'B05AT', 'B009E', 'B035I', 'B035Q', 'B35AC', 'B35AD', 'B12AC', 'B12AD', 'B12AG', 'B12AK', 'B12AR', 'B015T', 'B015Y', 'B015Z', 'B15AA', 'B028B', 'B028J', 'B028P', 'B26BC', 'B26BH', 'B26BK', 'B033L', 'B033N', 'B33BE', 'B33BG', 'B33BM', 'B033E', 'B033F', 'B033H', 'B033V', 'B33BF', 'B33BI', 'B034W', 'B34AE', 'B34AH', 'B001M', 'B019L', 'B042L', 'B39CZ', 'B48AX', 'B17BS', 'B17CP', 'B033R', 'B54BL', 'B54CK', 'B020R', 'B020W', 'B73AC', 'B73AI', 'B73AJ', 'B73AK', 'B73AL', 'B021Y', 'B076N', 'B076P', 'B076Q', 'B36AD', 'B27AH', 'B16BS', 'B16CK', 'B25AI', 'B013V', 'B013Y', 'B013Z', 'B13AA', 'B13AC', 'B13AG', 'B13AH']
+
+
+#### Playground
+
+Scrape this page using python https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/details/?species=OYG&connection=SHS&PointID=B27AH and get the value for `National Grid Reference:` (hint, the value for it for that page `SX92177280`). 
+
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/details/?species=OYG&connection=SHS&PointID=B27AH'
+
+r = requests.get(url)
+soup = BeautifulSoup(r.content, 'html.parser')
+
+national_grid_ref = soup.find('span', {'class': 'ngr'})
+print(national_grid_ref.text)
+
+# Output: SX92177280
+
+That doesn't work. Look for `National Grid Reference:` in the html file, and pull out the value in the `div` directly after finding that. 
+
+national_grid_ref = soup.find('div', string='National Grid Reference:').next_sibling.text
+print(national_grid_ref)
+
+# Output: SX92177280
+
+
+### Playground
+
+This is a script that scrapes the grid reference for one PointID: 
+import requests
+from bs4 import BeautifulSoup
+
+url = 'https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/details/?species=OYG&connection=SHS&PointID=B27AH'
+
+r = requests.get(url)
+soup = BeautifulSoup(r.content, 'html.parser')
+
+national_grid_ref = soup.find('div', string='National Grid Reference:').next_sibling.next_sibling.text
+print(national_grid_ref)
+
+Alter the script to take a list of `PointIDs`, loop over each ID, calling the URL with the PointID injected into it, then scraping the national grid reference out, then put all those records (PointID with national grid reference) into a dataframe and write it to disk as csv.
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+PointIDs = ["B27AH", "B27BD", "B27CJ"]
+
+data = []
+
+for ID in PointIDs:
+    url = f'https://www.cefas.co.uk/data-and-publications/shellfish-classification-and-microbiological-monitoring/england-and-wales/shellfish-monitoring-results/details/?species=OYG&connection=SHS&PointID={ID}'
+
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+
+    national_grid_ref = soup.find('div', string='National Grid Reference:').next_sibling.next_sibling.text
+    data.append({'PointID':ID, 'National Grid Reference':national_grid_ref})
+
+df = pd.DataFrame(data)
+df.to_csv('point_ids_and_grid_refs.csv', index=False)
